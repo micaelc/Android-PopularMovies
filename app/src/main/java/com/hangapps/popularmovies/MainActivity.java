@@ -13,6 +13,7 @@ import com.hangapps.popularmovies.network.ApiTmdbService;
 import com.hangapps.popularmovies.utils.Constants;
 
 import java.io.IOException;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,22 +34,19 @@ public class MainActivity extends AppCompatActivity {
 			Toast.makeText(this, "clickei", Toast.LENGTH_SHORT).show();
 
 			ApiTmdbService service = ApiTmdbService.retrofit.create(ApiTmdbService.class);
-			Call<MoviesResponse> call = service.getMovies(BuildConfig.TMDB_API_KEY, Constants.APIConstants.SORT_POPULARITY,1);
+			Call<MoviesResponse<Movie>> call = service.getMovies(BuildConfig.TMDB_API_KEY, Constants.APIConstants.SORT_POPULARITY,1);
 
-			call.enqueue(new Callback<MoviesResponse>() {
+			call.enqueue(new Callback<MoviesResponse<Movie>>() {
 				@Override
-				public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
-
-					MoviesResponse movies = response.body();
+				public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
+					List<Movie> movies = response.body().getResults();
 					Toast.makeText(MainActivity.this, "e não é que deu ???", Toast.LENGTH_SHORT).show();
 				}
-
 				@Override
-				public void onFailure(Call<MoviesResponse> call, Throwable t) {
+				public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
 					Toast.makeText(MainActivity.this, "something went wrong", Toast.LENGTH_SHORT).show();
 				}
 			});
-
 
 		}
 

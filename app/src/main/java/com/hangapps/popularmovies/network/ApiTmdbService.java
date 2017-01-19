@@ -1,5 +1,6 @@
 package com.hangapps.popularmovies.network;
 
+import com.hangapps.popularmovies.models.Movie;
 import com.hangapps.popularmovies.models.MoviesResponse;
 import com.hangapps.popularmovies.utils.Constants;
 
@@ -18,13 +19,13 @@ import static retrofit2.Retrofit.Builder;
 public interface ApiTmdbService {
 
 	@GET("3/discover/movie?")
-	Call<MoviesResponse> getMovies(
+	Call<MoviesResponse<Movie>> getMovies(
 			@Query(Constants.APIConstants.APP_KEY_QUERY_API_KEY) String apiKey,
 			@Query(Constants.APIConstants.APP_KEY_QUERY_SORT_BY) String sortBy,
 			@Query(Constants.APIConstants.APP_KEY_QUERY_PAGE) int page);
 
 
-	public static final Retrofit retrofit = new Builder()
+	Retrofit retrofit = new Builder()
 			.baseUrl(Constants.APIConstants.BASE_URL)
 			.addConverterFactory(GsonConverterFactory.create())
 			.build();
