@@ -3,6 +3,8 @@ package com.hangapps.popularmovies.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.hangapps.popularmovies.utils.Constants;
+
 /**
  * Created by mcampos on 18/01/2017.
  */
@@ -90,5 +92,9 @@ public class Movie implements Parcelable {
 
 	public Float getVote_average() {
 		return vote_average;
+	}
+
+	public String getFullPosterPath(){
+		return Constants.APIConstants.IMAGE_BASE_URL + Constants.APIConstants.IMAGE_SMALL_SIZE + getPoster_path();
 	}
 }

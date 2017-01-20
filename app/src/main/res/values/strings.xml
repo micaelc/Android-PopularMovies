@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="get_action">Get</string>
+    <string name="sort_popularity">Most Popular</string>
+    <string name="sort_rate">Highest Rated</string>
+    <string name="internet_connection_msg">Please make sure you are connected to internet!</string>
+    <string name="something_wrong">Something went wrong! Please try again.</string>
 </resources>

@@ -48,19 +48,4 @@ public class MoviesResponse<Movie> {
         this.total_pages = total_pages;
     }
 
-//    private List<Movie> movies;
-//
-//    public MoviesResponse(List<Movie> movies) {
-//        this.movies = new ArrayList<Movie>();
-//    }
-//
-//    public List<Movie> getMovies() {
-//        return movies;
-//    }
-//
-//    public static MoviesResponse parseJson(String response){
-//        Gson gson = new GsonBuilder().create();
-//        MoviesResponse movieResponse = gson.fromJson(response, MoviesResponse.class);
-//        return movieResponse;
-//    }
 }
