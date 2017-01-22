@@ -31,16 +31,22 @@ public class MainActivity extends AppCompatActivity {
 	private GridView movieGrid;
 	public MovieAdapter mMovieAdapter;
 	private ApiTmdbService movieService;
-
+	private ArrayList<Movie> mMovies;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		// Creates empty list
-		final List<Movie> movies = new ArrayList<>();
+
+		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG)) {
+			mMovies = new ArrayList<>();
+		}
+		else {
+			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG);
+		}
+
 		// creates new MovieAdapter
-		mMovieAdapter = new MovieAdapter(this, movies);
+		mMovieAdapter = new MovieAdapter(this, mMovies);
 
 		movieGrid = (GridView)findViewById(R.id.movie_grid);
 		movieGrid.setAdapter(mMovieAdapter);
@@ -48,22 +54,28 @@ public class MainActivity extends AppCompatActivity {
 		movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Movie mMovie = movies.get(position);
+				Movie mMovie = mMovies.get(position);
 				StartDetailActivity(mMovie);
 			}
 		});
 		movieService = ApiTmdbService.retrofit.create(ApiTmdbService.class);
 
-		if(NetworkUtils.isOnline(this)){
-			// get Stored Preferences related to the last Sort Order requested by the user
-			String sortOrder = GetPreference(Constants.MyPreferences.PREF_SORT_ORDER);
-			// if Preference exists, get the list with the latest sort order
-			if (sortOrder != null){
-				fetchMovies(sortOrder, 1);
-			}else { // if not, get the list with default values
-				fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
+		if(mMovies.size() == 0){
+
+			if(NetworkUtils.isOnline(this)){
+				// get Stored Preferences related to the last Sort Order requested by the user
+				String sortOrder = GetPreference(Constants.MyPreferences.PREF_SORT_ORDER);
+				// if Preference exists, get the list with the latest sort order
+				if (sortOrder != null){
+					fetchMovies(sortOrder, 1);
+				}else { // if not, get the list with default values
+					fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
+				}
 			}
+
 		}
+
+
 
 	}
 	// *****************************
@@ -144,8 +156,9 @@ public class MainActivity extends AppCompatActivity {
 
 	}
 
-
-
-
-
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putParcelableArrayList(Constants.APP_TAG, mMovies);
+		super.onSaveInstanceState(outState);
+	}
 }
