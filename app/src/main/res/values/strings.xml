@@ -4,4 +4,12 @@
     <string name="sort_rate">Highest Rated</string>
     <string name="internet_connection_msg">Please make sure you are connected to internet!</string>
     <string name="something_wrong">Something went wrong! Please try again.</string>
+    <string name="movie_title_text">The time of our lifes (Remake)</string>
+    <string name="movie_release_date">Release Date</string>
+    <string name="movie_release_date_text">01/01/2017</string>
+    <string name="movie_vote_average">Vote Average</string>
+    <string name="movie_vote_average_text">9.5</string>
+    <string name="movie_vote_average_total">out of 10</string>
+    <string name="movie_synopsis">Synopsis</string>
+    <string name="movie_synopsis_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed blandit purus. Aliquam accumsan consectetur varius. Integer in venenatis lacus. Vestibulum ac velit dolor. Sed vel diam ligula. Nullam in euismod odio. Duis vitae placerat metus, at posuere erat. Aliquam commodo ante sed metus sodales, vitae suscipit nunc bibendum.</string>
 </resources>

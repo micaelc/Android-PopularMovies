@@ -18,7 +18,7 @@ import java.util.List;
  * Created by mcampos on 20/01/2017.
  */
 
-public class MovieAdapter extends ArrayAdapter<Movie> {
+public class MovieAdapter extends ArrayAdapter<Movie>{
 
 
 	public MovieAdapter(Context context, List<Movie> movies) {
@@ -35,8 +35,10 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 		}
 
 		ImageView moviePoster = (ImageView)convertView.findViewById(R.id.movie_poster);
-		Picasso.with(getContext()).load(movie.getFullPosterPath()).into(moviePoster);
+		Picasso.with(getContext()).load(movie.getFullPosterPath()).placeholder(R.drawable.downloading_poster).error(R.drawable.no_poster_available).into(moviePoster);
 
 		return convertView;
 	}
+
+
 }

@@ -1,12 +1,15 @@
 package com.hangapps.popularmovies;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hangapps.popularmovies.adapters.MovieAdapter;
@@ -35,23 +38,32 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// Creates empty list
-		List<Movie> movies = new ArrayList<>();
+		final List<Movie> movies = new ArrayList<>();
 		// creates new MovieAdapter
 		mMovieAdapter = new MovieAdapter(this, movies);
 
 		movieGrid = (GridView)findViewById(R.id.movie_grid);
 		movieGrid.setAdapter(mMovieAdapter);
 
+		movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Movie mMovie = movies.get(position);
+				StartDetailActivity(mMovie);
+			}
+		});
 		movieService = ApiTmdbService.retrofit.create(ApiTmdbService.class);
 
 		if(NetworkUtils.isOnline(this)){
-			fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
+			// get Stored Preferences related to the last Sort Order requested by the user
+			String sortOrder = GetPreference(Constants.MyPreferences.PREF_SORT_ORDER);
+			// if Preference exists, get the list with the latest sort order
+			if (sortOrder != null){
+				fetchMovies(sortOrder, 1);
+			}else { // if not, get the list with default values
+				fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
+			}
 		}
-
-
-
-
-
 
 	}
 	// *****************************
@@ -69,10 +81,12 @@ public class MainActivity extends AppCompatActivity {
 		if (NetworkUtils.isOnline(this)){
 			switch (itemId){
 				case R.id.option_menu_sort_popularity:
+					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_POPULARITY);
 					fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
 					Log.i(Constants.APP_TAG, "Fetch Most Popular Movies");
 					break;
 				case R.id.option_menu_sort_rate:
+					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_RATING);
 					fetchMovies(Constants.APIConstants.SORT_RATING, 1);
 					Log.i(Constants.APP_TAG, "Fetch Highest Rated Movies");
 					break;
@@ -86,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
 	// ******* Helper Methods *********
 	// ********************************
 	public void fetchMovies(String sortOrder, int page){
-
 
 		Call<MoviesResponse<Movie>> call = movieService.getMovies(BuildConfig.TMDB_API_KEY, sortOrder, page);
 
@@ -104,8 +117,34 @@ public class MainActivity extends AppCompatActivity {
 				Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
 			}
 		});
+	}
+
+	public void StorePreference(String key, String value){
+		SharedPreferences prefs = getSharedPreferences(Constants.MyPreferences.MY_FREFS_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(key, value);
+		editor.commit();
+	}
+
+	public String GetPreference(String key){
+		SharedPreferences prefs = getSharedPreferences(Constants.MyPreferences.MY_FREFS_NAME, MODE_PRIVATE);
+		if (key != null){
+			String value = prefs.getString(key, null);
+			if(value != null){
+				return value;
+			}
+		}
+		return null;
+	}
+
+	public void StartDetailActivity (Movie movie){
+		Intent intent = new Intent(this, DetailActivity.class);
+		intent.putExtra(Constants.APP_TAG, movie);
+		startActivity(intent);
 
 	}
+
+
 
 
 

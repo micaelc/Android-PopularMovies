@@ -18,4 +18,10 @@ public class Constants {
 		public final static String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 		public final static String IMAGE_SMALL_SIZE = "w185";
 	}
+
+	public final static class MyPreferences{
+		public static final String MY_FREFS_NAME = "my_shared_prefs";
+		public static final String PREF_SORT_ORDER = "sort_order";
+
+	}
 }
