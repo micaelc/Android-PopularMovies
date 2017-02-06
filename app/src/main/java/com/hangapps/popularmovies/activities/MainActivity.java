@@ -1,4 +1,4 @@
-package com.hangapps.popularmovies;
+package com.hangapps.popularmovies.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +12,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.facebook.stetho.Stetho;
+import com.hangapps.popularmovies.BuildConfig;
+import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.adapters.MovieAdapter;
 import com.hangapps.popularmovies.models.Movie;
 import com.hangapps.popularmovies.models.MoviesResponse;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Stetho.initializeWithDefaults(this);
 
 		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG)) {
 			mMovies = new ArrayList<>();
