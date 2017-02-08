@@ -4,12 +4,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
@@ -23,24 +22,30 @@ import com.hangapps.popularmovies.network.NetworkUtils;
 import com.hangapps.popularmovies.utils.Constants;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-	private GridView movieGrid;
-	public MovieAdapter mMovieAdapter;
 	private ApiTmdbService movieService;
 	private ArrayList<Movie> mMovies;
+	private MovieAdapter mAdapter;
+	private GridLayoutManager mLayoutManager;
+
+	@BindView(R.id.rvMovieGrid)
+	RecyclerView mRecyclerView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
 		Stetho.initializeWithDefaults(this);
+		setContentView(R.layout.activity_main);
+		ButterKnife.bind(this);
+
 
 		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG)) {
 			mMovies = new ArrayList<>();
@@ -49,20 +54,13 @@ public class MainActivity extends AppCompatActivity {
 			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG);
 		}
 
-		// creates new MovieAdapter
-		mMovieAdapter = new MovieAdapter(this, mMovies);
-
-		movieGrid = (GridView)findViewById(R.id.movie_grid);
-		movieGrid.setAdapter(mMovieAdapter);
-
-		movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Movie mMovie = mMovies.get(position);
-				StartDetailActivity(mMovie);
-			}
-		});
 		movieService = ApiTmdbService.retrofit.create(ApiTmdbService.class);
+		mAdapter = new MovieAdapter(mMovies, this);
+		mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.grid_number_columns));
+		mRecyclerView.setLayoutManager(mLayoutManager);
+		mRecyclerView.setHasFixedSize(true);
+		mRecyclerView.setAdapter(mAdapter);
+
 
 		if(mMovies.size() == 0){
 
@@ -122,11 +120,8 @@ public class MainActivity extends AppCompatActivity {
 		call.enqueue(new Callback<MoviesResponse<Movie>>() {
 			@Override
 			public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
-				List<Movie> movies = response.body().getResults();
-				mMovieAdapter.clear();
-				for (Movie movie: movies){
-					mMovieAdapter.add(movie);
-				}
+				mMovies.addAll(response.body().getResults());
+				mAdapter.notifyDataSetChanged();
 			}
 			@Override
 			public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
