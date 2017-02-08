@@ -24,10 +24,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
 	private List<Movie> mMovies;
 	private Context mContext;
+	private MovieAdapterOnClickHandler mClickHandler;
 
-	public MovieAdapter(List<Movie> movies, Context context) {
+
+	public MovieAdapter(List<Movie> movies, Context context, MovieAdapterOnClickHandler clickHandler) {
 		mMovies = movies;
 		mContext = context;
+		mClickHandler = clickHandler;
 	}
 
 	@Override
@@ -56,7 +59,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 		return mMovies.size();
 	}
 
-	public class MovieViewHolder extends RecyclerView.ViewHolder{
+
+	// ********************************
+	// ******** OnClickHandler ********
+	// ********************************
+
+	public interface MovieAdapterOnClickHandler{
+		void onClick(Movie movie);
+	}
+
+
+	// *****************************
+	// ******** VIEW HOLDER ********
+	// *****************************
+
+	public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
 		@BindView(R.id.movie_poster)
 		ImageView moviePoster;
@@ -64,9 +81,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 		public MovieViewHolder(View itemView) {
 			super(itemView);
 			ButterKnife.bind(this, itemView);
+			itemView.setOnClickListener(this);
 
 
 		}
 
+		@Override
+		public void onClick(View itemView) {
+			int adapterPosition = getAdapterPosition();
+			Movie movie = mMovies.get(adapterPosition);
+			mClickHandler.onClick(movie);
+
+		}
 	}
 }

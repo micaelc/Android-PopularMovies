@@ -29,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
 	private ApiTmdbService movieService;
 	private ArrayList<Movie> mMovies;
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		movieService = ApiTmdbService.retrofit.create(ApiTmdbService.class);
-		mAdapter = new MovieAdapter(mMovies, this);
+		mAdapter = new MovieAdapter(mMovies, this, this);
 		mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.grid_number_columns));
 		mRecyclerView.setLayoutManager(mLayoutManager);
 		mRecyclerView.setHasFixedSize(true);
@@ -159,5 +159,10 @@ public class MainActivity extends AppCompatActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putParcelableArrayList(Constants.APP_TAG, mMovies);
 		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onClick(Movie movie) {
+		StartDetailActivity(movie);
 	}
 }
