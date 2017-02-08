@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.hangapps.popularmovies.BuildConfig;
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.adapters.MovieAdapter;
@@ -25,9 +26,12 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
@@ -54,7 +58,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG);
 		}
 
-		movieService = ApiTmdbService.retrofit.create(ApiTmdbService.class);
+		// Retrofit service
+		movieService = createService();
+
 		mAdapter = new MovieAdapter(mMovies, this, this);
 		mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.grid_number_columns));
 		mRecyclerView.setLayoutManager(mLayoutManager);
@@ -154,6 +160,33 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		startActivity(intent);
 
 	}
+
+	private ApiTmdbService createService (){
+
+		// GSON
+		/*
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(Forecast.class, new ForecastDeserialiser())
+				.create();
+		*/
+
+		// OkHttpClient
+		OkHttpClient httpClient = new OkHttpClient.Builder()
+				.addNetworkInterceptor(new StethoInterceptor())
+				.build();
+
+		// Retrofit
+		Retrofit retrofit = new Retrofit.Builder()
+				.baseUrl(Constants.APIConstants.BASE_URL)
+				.addConverterFactory(GsonConverterFactory.create())
+				.client(httpClient)
+				.build();
+
+		// Create
+		return retrofit.create(ApiTmdbService.class);
+
+	}
+
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

@@ -25,9 +25,6 @@ public interface ApiTmdbService {
 			@Query(Constants.APIConstants.APP_KEY_QUERY_PAGE) int page);
 
 
-	Retrofit retrofit = new Builder()
-			.baseUrl(Constants.APIConstants.BASE_URL)
-			.addConverterFactory(GsonConverterFactory.create())
-			.build();
+
 
 }
