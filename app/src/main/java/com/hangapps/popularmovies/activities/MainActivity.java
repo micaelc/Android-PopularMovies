@@ -16,6 +16,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.hangapps.popularmovies.BuildConfig;
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.adapters.MovieAdapter;
+import com.hangapps.popularmovies.fragments.MovieDetailsFragment;
 import com.hangapps.popularmovies.models.Movie;
 import com.hangapps.popularmovies.models.MoviesResponse;
 import com.hangapps.popularmovies.network.ApiTmdbService;
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	private MovieAdapter mAdapter;
 	private GridLayoutManager mLayoutManager;
 
+	private boolean mTwoPane;
+
 	@BindView(R.id.rvMovieGrid)
 	RecyclerView mRecyclerView;
 
@@ -47,9 +50,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Stetho.initializeWithDefaults(this);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_movie_main);
 		ButterKnife.bind(this);
 
+		if (findViewById(R.id.movie_detail_container) != null) {
+			// activity should be in two-pane mode.
+			mTwoPane = true;
+		}
 
 		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG)) {
 			mMovies = new ArrayList<>();
@@ -196,6 +203,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 	@Override
 	public void onClick(Movie movie) {
-		StartDetailActivity(movie);
+
+		if (mTwoPane) {
+			Bundle arguments = new Bundle();
+			arguments.putParcelable(MovieDetailsFragment.ARG_MOVIE_ITEM, movie);
+			MovieDetailsFragment fragment = new MovieDetailsFragment();
+			fragment.setArguments(arguments);
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.movie_detail_container, fragment)
+					.commit();
+		} else {
+			StartDetailActivity(movie);
+		}
 	}
 }
