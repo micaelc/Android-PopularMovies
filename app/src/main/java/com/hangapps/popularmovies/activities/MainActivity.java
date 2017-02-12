@@ -84,12 +84,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 					fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
 				}
 			}
-
 		}
-
-
-
 	}
+
+
 	// *****************************
 	// ******** Option Menu ********
 	// *****************************
@@ -114,32 +112,78 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 					fetchMovies(Constants.APIConstants.SORT_RATING, 1);
 					Log.i(Constants.APP_TAG, "Fetch Highest Rated Movies");
 					break;
+				case R.id.option_menu_sort_favorite:
+					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_FAVORITE);
+					fetchMovies(Constants.APIConstants.SORT_FAVORITE, 1);
+					Log.i(Constants.APP_TAG, "Fetch Favorite Movies");
+					break;
 			}
 		} else {
 			Toast.makeText(this, getString(R.string.internet_connection_msg) , Toast.LENGTH_SHORT).show();
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+
 	// ********************************
 	// ******* Helper Methods *********
 	// ********************************
 	public void fetchMovies(String sortOrder, int page){
 
-		Call<MoviesResponse<Movie>> call = movieService.getMovies(BuildConfig.TMDB_API_KEY, sortOrder, page);
-
-		call.enqueue(new Callback<MoviesResponse<Movie>>() {
-			@Override
-			public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
+		switch (sortOrder){
+			case Constants.APIConstants.SORT_FAVORITE:
 				mMovies.clear();
-				mMovies.addAll(response.body().getResults());
 				mAdapter.notifyDataSetChanged();
-			}
-			@Override
-			public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
-				Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
-			}
-		});
+				break;
+			case Constants.APIConstants.SORT_POPULARITY:
+			case Constants.APIConstants.SORT_RATING:
+
+				Call<MoviesResponse<Movie>> call = movieService.getMovies(BuildConfig.TMDB_API_KEY, sortOrder, page);
+
+				call.enqueue(new Callback<MoviesResponse<Movie>>() {
+					@Override
+					public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
+						mMovies.clear();
+						mMovies.addAll(response.body().getResults());
+						mAdapter.notifyDataSetChanged();
+					}
+					@Override
+					public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
+						Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
+					}
+				});
+				break;
+
+		}
 	}
+
+	@Override
+	public void onClick(Movie movie) {
+
+		if (mTwoPane) {
+			Bundle arguments = new Bundle();
+			arguments.putParcelable(MovieDetailsFragment.ARG_MOVIE_ITEM, movie);
+			MovieDetailsFragment fragment = new MovieDetailsFragment();
+			fragment.setArguments(arguments);
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.movie_detail_container, fragment)
+					.commit();
+		} else {
+			StartDetailActivity(movie);
+		}
+	}
+
+
+	public void StartDetailActivity (Movie movie){
+		Intent intent = new Intent(this, DetailActivity.class);
+		intent.putExtra(Constants.APP_TAG, movie);
+		startActivity(intent);
+
+	}
+
+	// ***************************************
+	// ******** Preferences & State **********
+	// ***************************************
 
 	public void StorePreference(String key, String value){
 		SharedPreferences prefs = getSharedPreferences(Constants.MyPreferences.MY_FREFS_NAME, MODE_PRIVATE);
@@ -159,33 +203,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		return null;
 	}
 
-	public void StartDetailActivity (Movie movie){
-		Intent intent = new Intent(this, DetailActivity.class);
-		intent.putExtra(Constants.APP_TAG, movie);
-		startActivity(intent);
-
-	}
-
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putParcelableArrayList(Constants.APP_TAG, mMovies);
 		super.onSaveInstanceState(outState);
 	}
 
-	@Override
-	public void onClick(Movie movie) {
 
-		if (mTwoPane) {
-			Bundle arguments = new Bundle();
-			arguments.putParcelable(MovieDetailsFragment.ARG_MOVIE_ITEM, movie);
-			MovieDetailsFragment fragment = new MovieDetailsFragment();
-			fragment.setArguments(arguments);
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.movie_detail_container, fragment)
-					.commit();
-		} else {
-			StartDetailActivity(movie);
-		}
-	}
 }

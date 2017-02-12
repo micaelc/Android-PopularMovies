@@ -15,6 +15,7 @@ public class Constants {
 		public static final String APP_KEY_QUERY_PAGE = "page";
 		public static final String SORT_POPULARITY = "popularity.desc";
 		public static final String SORT_RATING = "vote_average.desc";
+		public static final String SORT_FAVORITE = "favorite";
 		public final static String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 		public final static String IMAGE_SMALL_SIZE = "w185";
 	}
