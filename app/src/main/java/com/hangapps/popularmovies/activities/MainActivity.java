@@ -12,31 +12,28 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.hangapps.popularmovies.BuildConfig;
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.adapters.MovieAdapter;
 import com.hangapps.popularmovies.fragments.MovieDetailsFragment;
 import com.hangapps.popularmovies.models.Movie;
 import com.hangapps.popularmovies.models.MoviesResponse;
-import com.hangapps.popularmovies.network.ApiTmdbService;
 import com.hangapps.popularmovies.network.NetworkUtils;
+import com.hangapps.popularmovies.network.TmdbAip;
+import com.hangapps.popularmovies.network.TmdbService;
 import com.hangapps.popularmovies.utils.Constants;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
-	private ApiTmdbService movieService;
+	private TmdbAip movieService;
 	private ArrayList<Movie> mMovies;
 	private MovieAdapter mAdapter;
 	private GridLayoutManager mLayoutManager;
@@ -66,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		}
 
 		// Retrofit service
-		movieService = createService();
+		movieService = TmdbService.createService();
 
 		mAdapter = new MovieAdapter(mMovies, this, this);
 		mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.grid_number_columns));
@@ -133,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		call.enqueue(new Callback<MoviesResponse<Movie>>() {
 			@Override
 			public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
+				mMovies.clear();
 				mMovies.addAll(response.body().getResults());
 				mAdapter.notifyDataSetChanged();
 			}
@@ -165,32 +163,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		Intent intent = new Intent(this, DetailActivity.class);
 		intent.putExtra(Constants.APP_TAG, movie);
 		startActivity(intent);
-
-	}
-
-	private ApiTmdbService createService (){
-
-		// GSON
-		/*
-		Gson gson = new GsonBuilder()
-				.registerTypeAdapter(Forecast.class, new ForecastDeserialiser())
-				.create();
-		*/
-
-		// OkHttpClient
-		OkHttpClient httpClient = new OkHttpClient.Builder()
-				.addNetworkInterceptor(new StethoInterceptor())
-				.build();
-
-		// Retrofit
-		Retrofit retrofit = new Retrofit.Builder()
-				.baseUrl(Constants.APIConstants.BASE_URL)
-				.addConverterFactory(GsonConverterFactory.create())
-				.client(httpClient)
-				.build();
-
-		// Create
-		return retrofit.create(ApiTmdbService.class);
 
 	}
 

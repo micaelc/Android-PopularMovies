@@ -16,7 +16,7 @@ import static retrofit2.Retrofit.Builder;
  * Created by mcampos on 18/01/2017.
  */
 
-public interface ApiTmdbService {
+public interface TmdbAip {
 
 	@GET("3/discover/movie?")
 	Call<MoviesResponse<Movie>> getMovies(
