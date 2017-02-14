@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.hangapps.popularmovies"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -20,7 +20,8 @@ android {
             variant.buildConfigField "String", "TMDB_API_KEY", "\"" + getTmdbApiKey() + "\""
         }
     }
-
+    productFlavors {
+    }
 }
 
 def getTmdbApiKey() {

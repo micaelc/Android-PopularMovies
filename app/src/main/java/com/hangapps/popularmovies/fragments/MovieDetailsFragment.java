@@ -7,8 +7,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.models.Movie;
@@ -34,6 +36,8 @@ public class MovieDetailsFragment extends Fragment {
 	TextView mMovieVoteAverage;
 	@BindView(R.id.movie_synopsis)
 	TextView mMovieSynopsis;
+	@BindView(R.id.bt_favorite)
+	Button mFavorite;
 
 	Movie mMovie;
 
@@ -70,6 +74,14 @@ public class MovieDetailsFragment extends Fragment {
 					.placeholder(R.drawable.downloading_poster)
 					.error(R.drawable.no_poster_available)
 					.into(mMoviePoster);
+
+			mFavorite.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Toast.makeText(getContext(), "pois", Toast.LENGTH_SHORT).show();
+					mFavorite.setCompoundDrawablesWithIntrinsicBounds(getContext().getResources().getDrawable(R.drawable.heart_on),null, null, null);
+				}
+			});
 
 		}
 

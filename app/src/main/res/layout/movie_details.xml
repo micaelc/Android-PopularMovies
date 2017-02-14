@@ -114,17 +114,32 @@
 						android:layout_width="match_parent"
 						android:layout_height="25dp"
 						android:gravity="bottom|start"
-						android:paddingLeft="5dp"
 						android:paddingBottom="2dp"
+						android:paddingLeft="5dp"
 						android:text="@string/movie_vote_average_total"
 						android:textColor="@color/colorDetailText"
 						android:textSize="12sp"
 						/>
 
 				</LinearLayout>
+
 			</LinearLayout>
 
-
+			<Button
+				android:id="@+id/bt_favorite"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:layout_marginTop="25dp"
+				android:drawableStart="@drawable/heart_off"
+				android:drawablePadding="10dp"
+				android:paddingEnd="15dp"
+				android:paddingLeft="15dp"
+				android:paddingRight="15dp"
+				android:paddingStart="15dp"
+				android:text="@string/movie_add_favorite"
+				android:textSize="12sp"
+				/>
 		</LinearLayout>
 
 	</LinearLayout>
