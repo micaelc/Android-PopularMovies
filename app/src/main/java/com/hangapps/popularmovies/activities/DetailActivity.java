@@ -2,6 +2,7 @@ package com.hangapps.popularmovies.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.fragments.MovieDetailsFragment;
@@ -20,6 +21,7 @@ public class DetailActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_movie_details);
 		ButterKnife.bind(this);
 
+
 		if(savedInstanceState == null) {
 			Bundle b = getIntent().getExtras();
 			mMovie = b.getParcelable(Constants.APP_TAG);
@@ -35,4 +37,13 @@ public class DetailActivity extends AppCompatActivity {
 
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.home){
+			onBackPressed();
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
 }
