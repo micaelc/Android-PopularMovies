@@ -80,6 +80,17 @@ public class MovieDetailsFragment extends Fragment {
 				public void onClick(View v) {
 					Toast.makeText(getContext(), "pois", Toast.LENGTH_SHORT).show();
 					mFavorite.setCompoundDrawablesWithIntrinsicBounds(getContext().getResources().getDrawable(R.drawable.heart_on),null, null, null);
+
+					// if is already favorite
+						// delete from database
+						// restore button to default design
+
+					// else
+						// create contenvalues
+						// insert movie to database through a contentResolver
+
+
+
 				}
 			});
 
