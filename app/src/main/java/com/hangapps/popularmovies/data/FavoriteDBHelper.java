@@ -35,12 +35,12 @@ public class FavoriteDBHelper extends SQLiteOpenHelper {
 		String CREATE_TABLE = "CREATE TABLE " +
 				MovieFavoriteContract.FavoriteMovie.TABLE_NAME +" (" +
 				MovieFavoriteContract.FavoriteMovie._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID + " TEXT NOT NULL, " +
+				MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_TITLE + " TEXT NOT NULL, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_OVERVIEW + " TEXT, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_RELEASE_DATE + " TEXT, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE + " NUMERIC (2, 1), " +
-				MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER + " BLOB, " +
+				MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH + " TEXT, " +
 				");";
 
 		db.execSQL(CREATE_TABLE);
