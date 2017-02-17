@@ -55,10 +55,20 @@ public class FavoriteContentProvider extends ContentProvider {
 
 		switch (match) {
 			case FAVORITES:
-				retCursor =  db.query(MovieFavoriteContract.FavoriteMovie.TABLE_NAME,
+				retCursor = db.query(MovieFavoriteContract.FavoriteMovie.TABLE_NAME,
 						projection,
 						selection,
 						selectionArgs,
+						null,
+						null,
+						sortOrder);
+				break;
+			case FAVORITE_MOVIE_ID:
+				String id = uri.getPathSegments().get(1);
+				retCursor = db.query(MovieFavoriteContract.FavoriteMovie.TABLE_NAME,
+						projection,
+						MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID + "=?",
+						new String[]{id},
 						null,
 						null,
 						sortOrder);
@@ -93,7 +103,7 @@ public class FavoriteContentProvider extends ContentProvider {
 		switch (match) {
 			case FAVORITES:
 				long id = db.insert(TABLE_NAME, null, values);
-				if (id > 0){
+				if (id > 0) {
 					returnUri = ContentUris.withAppendedId(MovieFavoriteContract.FavoriteMovie.CONTENT_URI, id);
 				} else throw new android.database.SQLException("Failed to insert row into " + uri);
 				break;
@@ -109,7 +119,29 @@ public class FavoriteContentProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		return 0;
+
+		final SQLiteDatabase db = mDBHelper.getWritableDatabase();
+
+		int match = sUriMatcher.match(uri);
+		int moviesDeleted; // starts as 0
+
+		switch (match) {
+			case FAVORITE_MOVIE_ID:
+				String id = uri.getPathSegments().get(1);
+				moviesDeleted = db.delete(
+						MovieFavoriteContract.FavoriteMovie.TABLE_NAME,
+						MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID + "=?",
+						new String[]{id});
+				break;
+			default:
+				throw new UnsupportedOperationException("Unknown uri: " + uri);
+		}
+
+		if (moviesDeleted != 0) {
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
+
+		return moviesDeleted;
 	}
 
 	@Override

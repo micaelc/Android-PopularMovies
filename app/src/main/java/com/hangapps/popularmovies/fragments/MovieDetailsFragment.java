@@ -4,7 +4,7 @@ package com.hangapps.popularmovies.fragments;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hangapps.popularmovies.R;
 import com.hangapps.popularmovies.data.MovieFavoriteContract;
@@ -46,7 +47,8 @@ public class MovieDetailsFragment extends Fragment {
 	Button mFavorite;
 
 	Movie mMovie;
-
+	boolean alreadyFavorite;
+	Drawable icon;
 
 	public MovieDetailsFragment() {
 		// Required empty public constructor
@@ -58,6 +60,7 @@ public class MovieDetailsFragment extends Fragment {
 
 		if (getArguments().containsKey(ARG_MOVIE_ITEM)) {
 			mMovie = getArguments().getParcelable(ARG_MOVIE_ITEM);
+			alreadyFavorite = isFavorite();
 		}
 
 
@@ -69,7 +72,7 @@ public class MovieDetailsFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.movie_details, container, false);
 		ButterKnife.bind(this, rootView);
 
-		if (mMovie != null){
+		if (mMovie != null) {
 
 			mMovieTitle.setText(mMovie.getOriginal_title());
 			mMovieReleaseDate.setText(mMovie.getRelease_date());
@@ -81,71 +84,74 @@ public class MovieDetailsFragment extends Fragment {
 					.error(R.drawable.no_poster_available)
 					.into(mMoviePoster);
 
+			updateFavoriteIcon(alreadyFavorite);
 			mFavorite.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 
-					new AsyncTask<Void, Void, Boolean>(){
+					if (alreadyFavorite) {
+						// delete from favorites
+						String stringId = Integer.toString(mMovie.getId());
+						Uri uri = MovieFavoriteContract.FavoriteMovie.CONTENT_URI;
+						uri = uri.buildUpon().appendPath(stringId).build();
+						int moviesDeleted = getContext().getContentResolver().delete(uri, null, null);
 
-						@Override
-						protected Boolean doInBackground(Void... params) {
-							boolean alreadyFavorite = isFavorite();
-
-							if (alreadyFavorite){
-
-								// delete from database
-
-							} else {
-								ContentValues cv = new ContentValues();
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID, mMovie.getId());
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_TITLE, mMovie.getOriginal_title());
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_OVERVIEW, mMovie.getOverview());
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_RELEASE_DATE, mMovie.getRelease_date());
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE, mMovie.getVote_average());
-								cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH, mMovie.getFullPosterPath());
-
-								getContext().getContentResolver().insert(MovieFavoriteContract.FavoriteMovie.CONTENT_URI,cv);
-
-							}
-							return alreadyFavorite;
+						if (moviesDeleted > 0) {
+							Toast.makeText(getActivity(), "Apagado", Toast.LENGTH_LONG).show();
+							updateFavoriteIcon(false);
 						}
 
-						@Override
-						protected void onPostExecute(Boolean favorite) {
-							Drawable icon;
+					} else {
+						// add to favorites
+						ContentValues cv = new ContentValues();
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID, mMovie.getId());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_TITLE, mMovie.getOriginal_title());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_OVERVIEW, mMovie.getOverview());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_RELEASE_DATE, mMovie.getRelease_date());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE, mMovie.getVote_average());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH, mMovie.getFullPosterPath());
 
-							if (favorite)
-								icon = getContext().getResources().getDrawable(R.drawable.heart_off);
-							else
-								icon = getContext().getResources().getDrawable(R.drawable.heart_on);
+						getContext().getContentResolver().insert(MovieFavoriteContract.FavoriteMovie.CONTENT_URI, cv);
+						updateFavoriteIcon(true);
 
-							mFavorite.setCompoundDrawablesWithIntrinsicBounds(icon,null, null, null);
-						}
-					};
-
+					}
 				}
 			});
 
 		}
 
-		return rootView ;
+		return rootView;
 	}
 
-	private boolean isFavorite(){
+	private boolean isFavorite() {
+
+		boolean favorite = false;
+
+		String stringId = Integer.toString(mMovie.getId());
+		Uri uri = MovieFavoriteContract.FavoriteMovie.CONTENT_URI;
+		uri = uri.buildUpon().appendPath(stringId).build();
 
 		Cursor cursor = getContext().getContentResolver().query(
-				MovieFavoriteContract.FavoriteMovie.CONTENT_URI,
+				uri,
 				new String[]{COLUMN_MOVIE_ID},
-				COLUMN_MOVIE_ID + " = " + mMovie.getId(),
+				null,
 				null,
 				null);
 
-		if (cursor != null && cursor.moveToFirst()){
+		if (cursor != null && cursor.moveToFirst()) {
+			favorite = true;
 			cursor.close();
-			return true;
-		} else{
-			return false;
 		}
+		return favorite;
+	}
+
+	private void updateFavoriteIcon(boolean alreadyFavorite) {
+		if (alreadyFavorite)
+			icon = getContext().getResources().getDrawable(R.drawable.heart_on);
+		else
+			icon = getContext().getResources().getDrawable(R.drawable.heart_off);
+
+		mFavorite.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
 	}
 
 }

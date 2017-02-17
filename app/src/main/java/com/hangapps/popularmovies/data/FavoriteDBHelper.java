@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class FavoriteDBHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "movies.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 3;
 
 	public FavoriteDBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -39,8 +39,8 @@ public class FavoriteDBHelper extends SQLiteOpenHelper {
 				MovieFavoriteContract.FavoriteMovie.COLUMN_TITLE + " TEXT NOT NULL, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_OVERVIEW + " TEXT, " +
 				MovieFavoriteContract.FavoriteMovie.COLUMN_RELEASE_DATE + " TEXT, " +
-				MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE + " NUMERIC (2, 1), " +
-				MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH + " TEXT, " +
+				MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE + " REAL (2,1), " +
+				MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH + " TEXT " +
 				");";
 
 		db.execSQL(CREATE_TABLE);
