@@ -21,6 +21,7 @@ import com.hangapps.popularmovies.models.MoviesResponse;
 import com.hangapps.popularmovies.network.NetworkUtils;
 import com.hangapps.popularmovies.network.TmdbAip;
 import com.hangapps.popularmovies.network.TmdbService;
+import com.hangapps.popularmovies.tasks.FavoriteAsyncTask;
 import com.hangapps.popularmovies.utils.Constants;
 
 import java.util.ArrayList;
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		switch (sortOrder){
 			case Constants.APIConstants.SORT_FAVORITE:
 				mMovies.clear();
+				new FavoriteAsyncTask(this, mMovies).execute();
 				mAdapter.notifyDataSetChanged();
 				break;
 			case Constants.APIConstants.SORT_POPULARITY:
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 					}
 					@Override
 					public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
-						Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
+						Toast.makeText(MainActivity.this, getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
 					}
 				});
 				break;

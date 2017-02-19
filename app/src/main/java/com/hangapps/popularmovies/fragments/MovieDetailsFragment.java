@@ -47,7 +47,6 @@ public class MovieDetailsFragment extends Fragment {
 	Button mFavorite;
 
 	Movie mMovie;
-	boolean alreadyFavorite;
 	Drawable icon;
 
 	public MovieDetailsFragment() {
@@ -60,7 +59,6 @@ public class MovieDetailsFragment extends Fragment {
 
 		if (getArguments().containsKey(ARG_MOVIE_ITEM)) {
 			mMovie = getArguments().getParcelable(ARG_MOVIE_ITEM);
-			alreadyFavorite = isFavorite();
 		}
 
 
@@ -84,12 +82,12 @@ public class MovieDetailsFragment extends Fragment {
 					.error(R.drawable.no_poster_available)
 					.into(mMoviePoster);
 
-			updateFavoriteIcon(alreadyFavorite);
+			updateFavoriteIcon(isFavorite());
 			mFavorite.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 
-					if (alreadyFavorite) {
+					if (isFavorite()) {
 						// delete from favorites
 						String stringId = Integer.toString(mMovie.getId());
 						Uri uri = MovieFavoriteContract.FavoriteMovie.CONTENT_URI;
@@ -97,7 +95,7 @@ public class MovieDetailsFragment extends Fragment {
 						int moviesDeleted = getContext().getContentResolver().delete(uri, null, null);
 
 						if (moviesDeleted > 0) {
-							Toast.makeText(getActivity(), "Apagado", Toast.LENGTH_LONG).show();
+							Toast.makeText(getActivity(), R.string.favorite_removed, Toast.LENGTH_LONG).show();
 							updateFavoriteIcon(false);
 						}
 
@@ -109,9 +107,10 @@ public class MovieDetailsFragment extends Fragment {
 						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_OVERVIEW, mMovie.getOverview());
 						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_RELEASE_DATE, mMovie.getRelease_date());
 						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_VOTE_AVERAGE, mMovie.getVote_average());
-						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_FULL_PATH, mMovie.getFullPosterPath());
+						cv.put(MovieFavoriteContract.FavoriteMovie.COLUMN_POSTER_PATH, mMovie.getPoster_path());
 
 						getContext().getContentResolver().insert(MovieFavoriteContract.FavoriteMovie.CONTENT_URI, cv);
+						Toast.makeText(getActivity(), R.string.favorite_added, Toast.LENGTH_LONG).show();
 						updateFavoriteIcon(true);
 
 					}

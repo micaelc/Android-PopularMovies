@@ -24,7 +24,7 @@ public class MovieFavoriteContract {
 		public static final String COLUMN_OVERVIEW = "movie_overview";
 		public static final String COLUMN_RELEASE_DATE = "movie_release_date";
 		public static final String COLUMN_VOTE_AVERAGE = "movie_vote_average";
-		public static final String COLUMN_POSTER_FULL_PATH = "movie_poster";
+		public static final String COLUMN_POSTER_PATH = "movie_poster";
 
 	}
 }
