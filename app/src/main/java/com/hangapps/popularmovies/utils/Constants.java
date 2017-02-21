@@ -18,7 +18,8 @@ public class Constants {
 		public static final String SORT_FAVORITE = "favorite";
 		public final static String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 		public final static String IMAGE_SMALL_SIZE = "w185";
-	}
+		public static final String YOUTUBE_IMG_BASE_URL = "http://img.youtube.com/vi/"; // iG0P6bjyUNI/mqdefault.jpg
+ 	}
 
 	public final static class MyPreferences{
 		public static final String MY_FREFS_NAME = "my_shared_prefs";

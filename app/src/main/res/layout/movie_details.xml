@@ -131,8 +131,8 @@
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
 				android:layout_marginTop="25dp"
-				android:drawableStart="@drawable/heart_off"
 				android:drawablePadding="10dp"
+				android:drawableStart="@drawable/heart_off"
 				android:paddingEnd="15dp"
 				android:paddingLeft="15dp"
 				android:paddingRight="15dp"
@@ -171,6 +171,20 @@
 			android:textColor="@color/colorDetailText"
 			android:textSize="14sp"/>
 	</LinearLayout>
+
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/rv_trailers"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+	</android.support.v7.widget.RecyclerView>
+
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/rv_reviews"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+	</android.support.v7.widget.RecyclerView>
 
 
 </LinearLayout>
