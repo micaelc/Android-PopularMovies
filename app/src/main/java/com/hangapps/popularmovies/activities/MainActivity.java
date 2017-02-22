@@ -101,17 +101,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 			case R.id.option_menu_sort_popularity:
 				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_POPULARITY);
 				sortOrder = Constants.APIConstants.SORT_POPULARITY;
-				Log.i(Constants.APP_TAG, "Fetch Most Popular Movies");
+				Log.i(Constants.APP_TAG, getResources().getString(R.string.msg_popular_movies));
 				break;
 			case R.id.option_menu_sort_rate:
 				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_RATING);
 				sortOrder= Constants.APIConstants.SORT_RATING;
-				Log.i(Constants.APP_TAG, "Fetch Highest Rated Movies");
+				Log.i(Constants.APP_TAG, getResources().getString(R.string.msg_rated_movies));
 				break;
 			case R.id.option_menu_sort_favorite:
 				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_FAVORITE);
 				sortOrder = Constants.APIConstants.SORT_FAVORITE;
-				Log.i(Constants.APP_TAG, "Fetch Favorite Movies");
+				Log.i(Constants.APP_TAG, getResources().getString(R.string.msg_favorite_movies));
 				break;
 		}
 		fetchMovies(sortOrder, 1);

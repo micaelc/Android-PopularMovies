@@ -21,8 +21,13 @@
 	<string name="movie_reviews_author">Author</string>
 	<string name="movie_share_trailer">Share</string>
 	<string name="movie_share_trailer_url">Share URL</string>
+	<string name="movie_share_type">text/plain</string>
 
 	<string name="error_something_wrong">Something went wrong! Please try again.</string>
 	<string name="error_async_fail">Failed to asynchronously load data.</string>
+
+	<string name="msg_popular_movies">Fetch Most Popular Movies</string>
+	<string name="msg_rated_movies">Fetch Highest Rated Movies</string>
+	<string name="msg_favorite_movies">Fetch Favorite Movies</string>
 
 </resources>

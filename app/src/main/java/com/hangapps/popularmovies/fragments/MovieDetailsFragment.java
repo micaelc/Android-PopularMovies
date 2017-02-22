@@ -279,7 +279,7 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 	private void startShareActivity() {
 		if (mTrailers.size() != 0) {
 			Intent i = new Intent(Intent.ACTION_SEND);
-			i.setType("text/plain");
+			i.setType(getResources().getString(R.string.movie_share_type));
 			i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.movie_share_trailer_url));
 			i.putExtra(Intent.EXTRA_TEXT, mTrailers.get(0).getYoutubeUri().toString());
 			startActivity(Intent.createChooser(i, getResources().getString(R.string.movie_share_trailer_url)));
