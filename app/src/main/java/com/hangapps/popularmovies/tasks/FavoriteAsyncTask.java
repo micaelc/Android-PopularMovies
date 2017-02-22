@@ -62,6 +62,6 @@ public class FavoriteAsyncTask extends AsyncTask<Void, Void, List<Movie>> {
 
 	@Override
 	protected void onPostExecute(List<Movie> movies) {
-		movies.addAll(movies);
+		super.onPostExecute(movies);
 	}
 }

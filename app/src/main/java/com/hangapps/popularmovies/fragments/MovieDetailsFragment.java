@@ -2,6 +2,7 @@ package com.hangapps.popularmovies.fragments;
 
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -20,14 +21,19 @@ import android.widget.Toast;
 
 import com.hangapps.popularmovies.BuildConfig;
 import com.hangapps.popularmovies.R;
+import com.hangapps.popularmovies.adapters.ReviewAdapter;
 import com.hangapps.popularmovies.adapters.TrailerAdapter;
 import com.hangapps.popularmovies.data.MovieFavoriteContract;
 import com.hangapps.popularmovies.models.Movie;
+import com.hangapps.popularmovies.models.Review;
+import com.hangapps.popularmovies.models.ReviewsResponse;
 import com.hangapps.popularmovies.models.Trailer;
 import com.hangapps.popularmovies.models.TrailerResponse;
 import com.hangapps.popularmovies.network.NetworkUtils;
 import com.hangapps.popularmovies.network.TmdbAip;
 import com.hangapps.popularmovies.network.TmdbService;
+import com.hangapps.popularmovies.utils.Constants;
+import com.hangapps.popularmovies.utils.MyPrefs;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -44,7 +50,7 @@ import static com.hangapps.popularmovies.data.MovieFavoriteContract.FavoriteMovi
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MovieDetailsFragment extends Fragment {
+public class MovieDetailsFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler{
 
 	public static final String ARG_MOVIE_ITEM = "movieItem";
 
@@ -64,10 +70,16 @@ public class MovieDetailsFragment extends Fragment {
 	@BindView(R.id.rv_trailers)
 	RecyclerView mTrailersRecyclerView;
 
+	@BindView(R.id.rv_reviews)
+	RecyclerView mReviewsRecyclerView;
+
 	private List<Trailer> mTrailers = new ArrayList<>();
+	private List<Review> mReviews = new ArrayList<>();
 	private TmdbAip service;
 	private TrailerAdapter mTrailerAdapter;
+	private ReviewAdapter mReviewAdapter;
 	private LinearLayoutManager mTrailerLayoutManager;
+	private LinearLayoutManager mReviewLayoutManager;
 
 	private Movie mMovie;
 	private Drawable icon;
@@ -84,6 +96,7 @@ public class MovieDetailsFragment extends Fragment {
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setRetainInstance(true);
 
 		if (getArguments().containsKey(ARG_MOVIE_ITEM)) {
 			mMovie = getArguments().getParcelable(ARG_MOVIE_ITEM);
@@ -122,6 +135,7 @@ public class MovieDetailsFragment extends Fragment {
 						if (moviesDeleted > 0) {
 							Toast.makeText(getActivity(), R.string.favorite_removed, Toast.LENGTH_LONG).show();
 							updateFavoriteIcon(false);
+							MyPrefs.StorePreference(getActivity(), Constants.MyPreferences.PREF_FAVORITE_CHANGED, true);
 						}
 					} else {
 						// add to favorites
@@ -141,7 +155,9 @@ public class MovieDetailsFragment extends Fragment {
 			});
 
 			service = TmdbService.createService();
-			mTrailerAdapter = new TrailerAdapter(mTrailers, getActivity());
+
+			// ====== TRAILERS ========
+			mTrailerAdapter = new TrailerAdapter(mTrailers, getActivity(), this);
 			mTrailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
 			mTrailersRecyclerView.setLayoutManager(mTrailerLayoutManager);
 			mTrailersRecyclerView.setHasFixedSize(true);
@@ -164,7 +180,33 @@ public class MovieDetailsFragment extends Fragment {
 						}
 					});
 				}
+			}
 
+			// ====== REVIEWS ========
+			mReviewAdapter = new ReviewAdapter(mReviews, getActivity());
+			mReviewLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+			mReviewsRecyclerView.setLayoutManager(mReviewLayoutManager);
+			mReviewsRecyclerView.setHasFixedSize(true);
+			mReviewsRecyclerView.setAdapter(mReviewAdapter);
+
+			if (mReviews.size() == 0){
+				if(NetworkUtils.isOnline(getActivity())){
+					Call<ReviewsResponse<Review>> call = service.getReviews(mMovie.getId(), BuildConfig.TMDB_API_KEY);
+
+					call.enqueue(new Callback<ReviewsResponse<Review>>() {
+						@Override
+						public void onResponse(Call<ReviewsResponse<Review>> call, Response<ReviewsResponse<Review>> response) {
+							mReviews.clear();
+							mReviews.addAll(response.body().getResults());
+							mReviewAdapter.notifyDataSetChanged();
+						}
+
+						@Override
+						public void onFailure(Call<ReviewsResponse<Review>> call, Throwable t) {
+							Toast.makeText(getActivity(), getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
+						}
+					});
+				}
 			}
 
 		}
@@ -201,5 +243,11 @@ public class MovieDetailsFragment extends Fragment {
 			icon = getContext().getResources().getDrawable(R.drawable.heart_off);
 
 		mFavorite.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+	}
+
+	@Override
+	public void onClick(Trailer trailer) {
+		Intent youTubeIntent = new Intent(Intent.ACTION_VIEW, trailer.getYoutubeUri());
+		startActivity(youTubeIntent);
 	}
 }

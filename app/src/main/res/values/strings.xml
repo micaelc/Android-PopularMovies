@@ -16,7 +16,10 @@
 	<string name="movie_synopsis_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed blandit purus. Aliquam accumsan consectetur varius. Integer in venenatis lacus. Vestibulum ac velit dolor. Sed vel diam ligula. Nullam in euismod odio. Duis vitae placerat metus, at posuere erat. Aliquam commodo ante sed metus sodales, vitae suscipit nunc bibendum.</string>
 	<string name="favorite_removed">Movie Removed from Favorites</string>
 	<string name="favorite_added">Movie Added to Favorites</string>
-
+	<string name="movie_trailers">Trailers</string>
+	<string name="movie_reviews">Reviews</string>
+	<string name="movie_reviews_author">Author</string>
+	s
 	<string name="error_something_wrong">Something went wrong! Please try again.</string>
 	<string name="error_async_fail">Failed to asynchronously load data.</string>
 

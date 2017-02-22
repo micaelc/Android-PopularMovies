@@ -82,8 +82,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 			super(itemView);
 			ButterKnife.bind(this, itemView);
 			itemView.setOnClickListener(this);
-
-
 		}
 
 		@Override
@@ -91,7 +89,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 			int adapterPosition = getAdapterPosition();
 			Movie movie = mMovies.get(adapterPosition);
 			mClickHandler.onClick(movie);
-
 		}
 	}
 }

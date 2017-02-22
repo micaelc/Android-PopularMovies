@@ -8,7 +8,7 @@ public class Constants {
 
 	public final static String APP_TAG = "POPULAR_MOVIE";
 	public final static String APP_TAG_MOVIES = "LIST_MOVIES";
-	public final static String APP_TAG_TRAILERS = "LIST_TRAILERS";
+	public static final String YOUTUBE_VIDEO_URL = "http://www.youtube.com/watch?v=";
 
 
 	public final static class APIConstants{
@@ -27,6 +27,8 @@ public class Constants {
 	public final static class MyPreferences{
 		public static final String MY_FREFS_NAME = "my_shared_prefs";
 		public static final String PREF_SORT_ORDER = "sort_order";
+		public static final String PREF_FAVORITE_CHANGED = "favorite_change";
+
 
 	}
 }

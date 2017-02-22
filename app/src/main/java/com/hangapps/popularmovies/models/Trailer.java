@@ -1,5 +1,6 @@
 package com.hangapps.popularmovies.models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -57,6 +58,10 @@ public class Trailer implements Parcelable {
 
 	public String getTrailerImgFullPath(){
 		return Constants.APIConstants.YOUTUBE_IMG_BASE_URL + getKey() + "/mqdefault.jpg";
+	}
+
+	public Uri getYoutubeUri(){
+		return Uri.parse(Constants.YOUTUBE_VIDEO_URL + getKey());
 	}
 
 	@Override

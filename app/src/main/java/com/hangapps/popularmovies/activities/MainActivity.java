@@ -1,7 +1,6 @@
 package com.hangapps.popularmovies.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -23,6 +22,7 @@ import com.hangapps.popularmovies.network.TmdbAip;
 import com.hangapps.popularmovies.network.TmdbService;
 import com.hangapps.popularmovies.tasks.FavoriteAsyncTask;
 import com.hangapps.popularmovies.utils.Constants;
+import com.hangapps.popularmovies.utils.MyPrefs;
 
 import java.util.ArrayList;
 
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	private GridLayoutManager mLayoutManager;
 
 	private boolean mTwoPane;
+	private String sortOrder;
 
 	@BindView(R.id.rvMovieGrid)
 	RecyclerView mRecyclerView;
@@ -56,10 +57,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 			mTwoPane = true;
 		}
 
-		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG_MOVIES)) {
+		if (savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG_MOVIES)) {
 			mMovies = new ArrayList<>();
-		}
-		else {
+		} else {
 			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG_MOVIES);
 		}
 
@@ -73,18 +73,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		mRecyclerView.setAdapter(mAdapter);
 
 
-		if(mMovies.size() == 0){
+		if (mMovies.size() == 0) {
+			// get Stored Preferences related to the last Sort Order requested by the user
+			sortOrder = MyPrefs.GetStringPreference(this, Constants.MyPreferences.PREF_SORT_ORDER);
+			// if Preference exists, get the list with the latest sort order
+			if (sortOrder == null)
+				sortOrder = Constants.APIConstants.SORT_POPULARITY;
+			fetchMovies(sortOrder, 1);
 
-			if(NetworkUtils.isOnline(this)){
-				// get Stored Preferences related to the last Sort Order requested by the user
-				String sortOrder = GetPreference(Constants.MyPreferences.PREF_SORT_ORDER);
-				// if Preference exists, get the list with the latest sort order
-				if (sortOrder != null){
-					fetchMovies(sortOrder, 1);
-				}else { // if not, get the list with default values
-					fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
-				}
-			}
 		}
 	}
 
@@ -94,34 +90,31 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	// *****************************
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.options_menu,menu);
+		getMenuInflater().inflate(R.menu.options_menu, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
-		if (NetworkUtils.isOnline(this)){
-			switch (itemId){
-				case R.id.option_menu_sort_popularity:
-					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_POPULARITY);
-					fetchMovies(Constants.APIConstants.SORT_POPULARITY, 1);
-					Log.i(Constants.APP_TAG, "Fetch Most Popular Movies");
-					break;
-				case R.id.option_menu_sort_rate:
-					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_RATING);
-					fetchMovies(Constants.APIConstants.SORT_RATING, 1);
-					Log.i(Constants.APP_TAG, "Fetch Highest Rated Movies");
-					break;
-				case R.id.option_menu_sort_favorite:
-					StorePreference(Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_FAVORITE);
-					fetchMovies(Constants.APIConstants.SORT_FAVORITE, 1);
-					Log.i(Constants.APP_TAG, "Fetch Favorite Movies");
-					break;
-			}
-		} else {
-			Toast.makeText(this, getString(R.string.internet_connection_msg) , Toast.LENGTH_SHORT).show();
+		switch (itemId) {
+			case R.id.option_menu_sort_popularity:
+				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_POPULARITY);
+				sortOrder = Constants.APIConstants.SORT_POPULARITY;
+				Log.i(Constants.APP_TAG, "Fetch Most Popular Movies");
+				break;
+			case R.id.option_menu_sort_rate:
+				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_RATING);
+				sortOrder= Constants.APIConstants.SORT_RATING;
+				Log.i(Constants.APP_TAG, "Fetch Highest Rated Movies");
+				break;
+			case R.id.option_menu_sort_favorite:
+				MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_SORT_ORDER, Constants.APIConstants.SORT_FAVORITE);
+				sortOrder = Constants.APIConstants.SORT_FAVORITE;
+				Log.i(Constants.APP_TAG, "Fetch Favorite Movies");
+				break;
 		}
+		fetchMovies(sortOrder, 1);
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -129,9 +122,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	// ********************************
 	// ******* Helper Methods *********
 	// ********************************
-	public void fetchMovies(String sortOrder, int page){
+	public void fetchMovies(String sortOrder, int page) {
 
-		switch (sortOrder){
+		switch (sortOrder) {
 			case Constants.APIConstants.SORT_FAVORITE:
 				mMovies.clear();
 				new FavoriteAsyncTask(this, mMovies).execute();
@@ -140,22 +133,25 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 			case Constants.APIConstants.SORT_POPULARITY:
 			case Constants.APIConstants.SORT_RATING:
 
-				Call<MoviesResponse<Movie>> call = movieService.getMovies(BuildConfig.TMDB_API_KEY, sortOrder, page);
+				if (NetworkUtils.isOnline(this)) {
+					Call<MoviesResponse<Movie>> call = movieService.getMovies(BuildConfig.TMDB_API_KEY, sortOrder, page);
+					call.enqueue(new Callback<MoviesResponse<Movie>>() {
+						@Override
+						public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
+							mMovies.clear();
+							mMovies.addAll(response.body().getResults());
+							mAdapter.notifyDataSetChanged();
+						}
 
-				call.enqueue(new Callback<MoviesResponse<Movie>>() {
-					@Override
-					public void onResponse(Call<MoviesResponse<Movie>> call, Response<MoviesResponse<Movie>> response) {
-						mMovies.clear();
-						mMovies.addAll(response.body().getResults());
-						mAdapter.notifyDataSetChanged();
-					}
-					@Override
-					public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
-						Toast.makeText(MainActivity.this, getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
-					}
-				});
+						@Override
+						public void onFailure(Call<MoviesResponse<Movie>> call, Throwable t) {
+							Toast.makeText(MainActivity.this, getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
+						}
+					});
+				} else {
+					Toast.makeText(this, getString(R.string.internet_connection_msg), Toast.LENGTH_SHORT).show();
+				}
 				break;
-
 		}
 	}
 
@@ -176,33 +172,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	}
 
 
-	public void StartDetailActivity (Movie movie){
+	public void StartDetailActivity(Movie movie) {
 		Intent intent = new Intent(this, DetailActivity.class);
 		intent.putExtra(Constants.APP_TAG_MOVIES, movie);
 		startActivity(intent);
 
-	}
-
-	// ***************************************
-	// ******** Preferences & State **********
-	// ***************************************
-
-	public void StorePreference(String key, String value){
-		SharedPreferences prefs = getSharedPreferences(Constants.MyPreferences.MY_FREFS_NAME, MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(key, value);
-		editor.commit();
-	}
-
-	public String GetPreference(String key){
-		SharedPreferences prefs = getSharedPreferences(Constants.MyPreferences.MY_FREFS_NAME, MODE_PRIVATE);
-		if (key != null){
-			String value = prefs.getString(key, null);
-			if(value != null){
-				return value;
-			}
-		}
-		return null;
 	}
 
 	@Override
@@ -211,5 +185,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		super.onSaveInstanceState(outState);
 	}
 
-
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (Constants.APIConstants.SORT_FAVORITE.equals(sortOrder) && MyPrefs.GetBooleanPreference(this, Constants.MyPreferences.PREF_FAVORITE_CHANGED)){
+			fetchMovies(sortOrder,1);
+			MyPrefs.StorePreference(this, Constants.MyPreferences.PREF_FAVORITE_CHANGED, false);
+		}
+	}
 }

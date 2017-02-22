@@ -24,10 +24,12 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
 	private List<Trailer>mTrailers;
 	private Context mContext;
+	private TrailerAdapterOnClickHandler mClickHandler;
 
-	public TrailerAdapter(List<Trailer> trailers, Context context) {
+	public TrailerAdapter(List<Trailer> trailers, Context context, TrailerAdapterOnClickHandler clickHandler) {
 		mTrailers = trailers;
 		mContext = context;
+		mClickHandler = clickHandler;
 	}
 
 	@Override
@@ -40,7 +42,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
 	@Override
 	public void onBindViewHolder(TrailerViewHolder holder, int position) {
-
 		Trailer trailer = mTrailers.get(position);
 		Picasso.with(mContext)
 				.load(trailer.getTrailerImgFullPath())
@@ -54,7 +55,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 		return mTrailers.size();
 	}
 
-	public class TrailerViewHolder extends RecyclerView.ViewHolder{
+	public class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
 		@BindView(R.id.iv_trailer_thumbnail)
 		ImageView trailerThumbnail;
@@ -62,7 +63,22 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 		public TrailerViewHolder(View itemView) {
 			super(itemView);
 			ButterKnife.bind(this, itemView);
-
+			itemView.setOnClickListener(this);
 		}
+
+		@Override
+		public void onClick(View view) {
+			int adapterPosition = getAdapterPosition();
+			Trailer trailer = mTrailers.get(adapterPosition);
+			mClickHandler.onClick(trailer);
+		}
+	}
+
+	// ********************************
+	// ******** OnClickHandler ********
+	// ********************************
+
+	public interface TrailerAdapterOnClickHandler{
+		void onClick(Trailer trailer);
 	}
 }
