@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 	// ******* Helper Methods *********
 	// ********************************
 	public void fetchMovies(String sortOrder, int page) {
-
 		switch (sortOrder) {
 			case Constants.APIConstants.SORT_FAVORITE:
 				mMovies.clear();
@@ -157,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 	@Override
 	public void onClick(Movie movie) {
-
 		if (mTwoPane) {
 			Bundle arguments = new Bundle();
 			arguments.putParcelable(MovieDetailsFragment.ARG_MOVIE_ITEM, movie);
@@ -185,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 		super.onSaveInstanceState(outState);
 	}
 
+	// refresh the favorite movie list after removing one movie from the
+	// favorites and go back into the Movie Grid (Only if sort order is = favorite
 	@Override
 	protected void onResume() {
 		super.onResume();

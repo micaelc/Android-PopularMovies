@@ -50,7 +50,7 @@ import static com.hangapps.popularmovies.data.MovieFavoriteContract.FavoriteMovi
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MovieDetailsFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler{
+public class MovieDetailsFragment extends Fragment implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
 	public static final String ARG_MOVIE_ITEM = "movieItem";
 
@@ -66,6 +66,8 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 	TextView mMovieSynopsis;
 	@BindView(R.id.bt_favorite)
 	Button mFavorite;
+	@BindView(R.id.bt_share)
+	Button mBtnShare;
 
 	@BindView(R.id.rv_trailers)
 	RecyclerView mTrailersRecyclerView;
@@ -73,9 +75,10 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 	@BindView(R.id.rv_reviews)
 	RecyclerView mReviewsRecyclerView;
 
+	private TmdbAip service;
+
 	private List<Trailer> mTrailers = new ArrayList<>();
 	private List<Review> mReviews = new ArrayList<>();
-	private TmdbAip service;
 	private TrailerAdapter mTrailerAdapter;
 	private ReviewAdapter mReviewAdapter;
 	private LinearLayoutManager mTrailerLayoutManager;
@@ -96,7 +99,7 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRetainInstance(true);
+		setRetainInstance(true); // to maintain Trailers and Reviews after rotation
 
 		if (getArguments().containsKey(ARG_MOVIE_ITEM)) {
 			mMovie = getArguments().getParcelable(ARG_MOVIE_ITEM);
@@ -109,6 +112,7 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 		View rootView = inflater.inflate(R.layout.movie_details, container, false);
 		ButterKnife.bind(this, rootView);
 
+		// =========== MOVIE DETAILS ==========
 		if (mMovie != null) {
 
 			mMovieTitle.setText(mMovie.getOriginal_title());
@@ -122,6 +126,8 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 					.into(mMoviePoster);
 
 			updateFavoriteIcon(isFavorite());
+
+			// =========== Favorite Button =============
 			mFavorite.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -154,6 +160,15 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 				}
 			});
 
+			// =========== Share Button =============
+			if (mTrailers.size() != 0) mBtnShare.setVisibility(View.VISIBLE);
+			mBtnShare.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					startShareActivity();
+				}
+			});
+
 			service = TmdbService.createService();
 
 			// ====== TRAILERS ========
@@ -163,8 +178,8 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 			mTrailersRecyclerView.setHasFixedSize(true);
 			mTrailersRecyclerView.setAdapter(mTrailerAdapter);
 
-			if(mTrailers.size() == 0){
-				if(NetworkUtils.isOnline(getActivity())){
+			if (mTrailers.size() == 0) {
+				if (NetworkUtils.isOnline(getActivity())) {
 					Call<TrailerResponse<Trailer>> call = service.getTrailers(mMovie.getId(), BuildConfig.TMDB_API_KEY);
 
 					call.enqueue(new Callback<TrailerResponse<Trailer>>() {
@@ -173,7 +188,9 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 							mTrailers.clear();
 							mTrailers.addAll(response.body().getResults());
 							mTrailerAdapter.notifyDataSetChanged();
+							mBtnShare.setVisibility(View.VISIBLE);
 						}
+
 						@Override
 						public void onFailure(Call<TrailerResponse<Trailer>> call, Throwable t) {
 							Toast.makeText(getActivity(), getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
@@ -189,8 +206,8 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 			mReviewsRecyclerView.setHasFixedSize(true);
 			mReviewsRecyclerView.setAdapter(mReviewAdapter);
 
-			if (mReviews.size() == 0){
-				if(NetworkUtils.isOnline(getActivity())){
+			if (mReviews.size() == 0) {
+				if (NetworkUtils.isOnline(getActivity())) {
 					Call<ReviewsResponse<Review>> call = service.getReviews(mMovie.getId(), BuildConfig.TMDB_API_KEY);
 
 					call.enqueue(new Callback<ReviewsResponse<Review>>() {
@@ -214,8 +231,20 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 		return rootView;
 	}
 
-	private boolean isFavorite() {
+	// View Trailer with Youtube
+	@Override
+	public void onClick(Trailer trailer) {
+		Intent youTubeIntent = new Intent(Intent.ACTION_VIEW, trailer.getYoutubeUri());
+		startActivity(youTubeIntent);
+	}
 
+
+	// ********************************
+	// ******* Helper Methods *********
+	// ********************************
+
+	// verify if movie is already in favorite database
+	private boolean isFavorite() {
 		boolean favorite = false;
 
 		String stringId = Integer.toString(mMovie.getId());
@@ -236,6 +265,7 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 		return favorite;
 	}
 
+	// Updates the icon of favorite button accordingly
 	private void updateFavoriteIcon(boolean alreadyFavorite) {
 		if (alreadyFavorite)
 			icon = getContext().getResources().getDrawable(R.drawable.heart_on);
@@ -245,9 +275,14 @@ public class MovieDetailsFragment extends Fragment implements TrailerAdapter.Tra
 		mFavorite.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
 	}
 
-	@Override
-	public void onClick(Trailer trailer) {
-		Intent youTubeIntent = new Intent(Intent.ACTION_VIEW, trailer.getYoutubeUri());
-		startActivity(youTubeIntent);
+	// Share trailer with external apps
+	private void startShareActivity() {
+		if (mTrailers.size() != 0) {
+			Intent i = new Intent(Intent.ACTION_SEND);
+			i.setType("text/plain");
+			i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.movie_share_trailer_url));
+			i.putExtra(Intent.EXTRA_TEXT, mTrailers.get(0).getYoutubeUri().toString());
+			startActivity(Intent.createChooser(i, getResources().getString(R.string.movie_share_trailer_url)));
+		}
 	}
 }

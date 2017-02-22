@@ -19,7 +19,9 @@
 	<string name="movie_trailers">Trailers</string>
 	<string name="movie_reviews">Reviews</string>
 	<string name="movie_reviews_author">Author</string>
-	s
+	<string name="movie_share_trailer">Share</string>
+	<string name="movie_share_trailer_url">Share URL</string>
+
 	<string name="error_something_wrong">Something went wrong! Please try again.</string>
 	<string name="error_async_fail">Failed to asynchronously load data.</string>
 
