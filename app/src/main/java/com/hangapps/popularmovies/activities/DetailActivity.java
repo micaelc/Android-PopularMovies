@@ -24,7 +24,7 @@ public class DetailActivity extends AppCompatActivity {
 
 		if(savedInstanceState == null) {
 			Bundle b = getIntent().getExtras();
-			mMovie = b.getParcelable(Constants.APP_TAG);
+			mMovie = b.getParcelable(Constants.APP_TAG_MOVIES);
 
 			Bundle arguments = new Bundle();
 			arguments.putParcelable(MovieDetailsFragment.ARG_MOVIE_ITEM, mMovie);

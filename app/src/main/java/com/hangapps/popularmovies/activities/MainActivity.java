@@ -56,11 +56,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 			mTwoPane = true;
 		}
 
-		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG)) {
+		if(savedInstanceState == null || !savedInstanceState.containsKey(Constants.APP_TAG_MOVIES)) {
 			mMovies = new ArrayList<>();
 		}
 		else {
-			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG);
+			mMovies = savedInstanceState.getParcelableArrayList(Constants.APP_TAG_MOVIES);
 		}
 
 		// Retrofit service
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 	public void StartDetailActivity (Movie movie){
 		Intent intent = new Intent(this, DetailActivity.class);
-		intent.putExtra(Constants.APP_TAG, movie);
+		intent.putExtra(Constants.APP_TAG_MOVIES, movie);
 		startActivity(intent);
 
 	}
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putParcelableArrayList(Constants.APP_TAG, mMovies);
+		outState.putParcelableArrayList(Constants.APP_TAG_MOVIES, mMovies);
 		super.onSaveInstanceState(outState);
 	}
 

@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +18,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hangapps.popularmovies.BuildConfig;
 import com.hangapps.popularmovies.R;
+import com.hangapps.popularmovies.adapters.TrailerAdapter;
 import com.hangapps.popularmovies.data.MovieFavoriteContract;
 import com.hangapps.popularmovies.models.Movie;
+import com.hangapps.popularmovies.models.Trailer;
+import com.hangapps.popularmovies.models.TrailerResponse;
+import com.hangapps.popularmovies.network.NetworkUtils;
+import com.hangapps.popularmovies.network.TmdbAip;
+import com.hangapps.popularmovies.network.TmdbService;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.hangapps.popularmovies.data.MovieFavoriteContract.FavoriteMovie.COLUMN_MOVIE_ID;
 
@@ -46,11 +61,24 @@ public class MovieDetailsFragment extends Fragment {
 	@BindView(R.id.bt_favorite)
 	Button mFavorite;
 
-	Movie mMovie;
-	Drawable icon;
+	@BindView(R.id.rv_trailers)
+	RecyclerView mTrailersRecyclerView;
+
+	private List<Trailer> mTrailers = new ArrayList<>();
+	private TmdbAip service;
+	private TrailerAdapter mTrailerAdapter;
+	private LinearLayoutManager mTrailerLayoutManager;
+
+	private Movie mMovie;
+	private Drawable icon;
 
 	public MovieDetailsFragment() {
 		// Required empty public constructor
+	}
+
+	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
@@ -60,8 +88,6 @@ public class MovieDetailsFragment extends Fragment {
 		if (getArguments().containsKey(ARG_MOVIE_ITEM)) {
 			mMovie = getArguments().getParcelable(ARG_MOVIE_ITEM);
 		}
-
-
 	}
 
 	@Override
@@ -86,7 +112,6 @@ public class MovieDetailsFragment extends Fragment {
 			mFavorite.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-
 					if (isFavorite()) {
 						// delete from favorites
 						String stringId = Integer.toString(mMovie.getId());
@@ -98,7 +123,6 @@ public class MovieDetailsFragment extends Fragment {
 							Toast.makeText(getActivity(), R.string.favorite_removed, Toast.LENGTH_LONG).show();
 							updateFavoriteIcon(false);
 						}
-
 					} else {
 						// add to favorites
 						ContentValues cv = new ContentValues();
@@ -112,10 +136,36 @@ public class MovieDetailsFragment extends Fragment {
 						getContext().getContentResolver().insert(MovieFavoriteContract.FavoriteMovie.CONTENT_URI, cv);
 						Toast.makeText(getActivity(), R.string.favorite_added, Toast.LENGTH_LONG).show();
 						updateFavoriteIcon(true);
-
 					}
 				}
 			});
+
+			service = TmdbService.createService();
+			mTrailerAdapter = new TrailerAdapter(mTrailers, getActivity());
+			mTrailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+			mTrailersRecyclerView.setLayoutManager(mTrailerLayoutManager);
+			mTrailersRecyclerView.setHasFixedSize(true);
+			mTrailersRecyclerView.setAdapter(mTrailerAdapter);
+
+			if(mTrailers.size() == 0){
+				if(NetworkUtils.isOnline(getActivity())){
+					Call<TrailerResponse<Trailer>> call = service.getTrailers(mMovie.getId(), BuildConfig.TMDB_API_KEY);
+
+					call.enqueue(new Callback<TrailerResponse<Trailer>>() {
+						@Override
+						public void onResponse(Call<TrailerResponse<Trailer>> call, Response<TrailerResponse<Trailer>> response) {
+							mTrailers.clear();
+							mTrailers.addAll(response.body().getResults());
+							mTrailerAdapter.notifyDataSetChanged();
+						}
+						@Override
+						public void onFailure(Call<TrailerResponse<Trailer>> call, Throwable t) {
+							Toast.makeText(getActivity(), getString(R.string.error_something_wrong), Toast.LENGTH_SHORT).show();
+						}
+					});
+				}
+
+			}
 
 		}
 
@@ -152,5 +202,4 @@ public class MovieDetailsFragment extends Fragment {
 
 		mFavorite.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
 	}
-
 }

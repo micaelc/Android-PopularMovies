@@ -8,6 +8,6 @@
     <color name="colorDetailLabel">#444</color>
     <color name="colorDetailText">#111</color>
     <color name="colorWhite">#fff</color>
-    <color name="colorBlack">#000</color>
+    <color name="colorBlack">#000000</color>
 
 </resources>

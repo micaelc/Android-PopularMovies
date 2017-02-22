@@ -7,6 +7,9 @@ package com.hangapps.popularmovies.utils;
 public class Constants {
 
 	public final static String APP_TAG = "POPULAR_MOVIE";
+	public final static String APP_TAG_MOVIES = "LIST_MOVIES";
+	public final static String APP_TAG_TRAILERS = "LIST_TRAILERS";
+
 
 	public final static class APIConstants{
 		public static final String BASE_URL = "http://api.themoviedb.org/";
